@@ -214,4 +214,7 @@ def get_transactions(
         query = query.filter(models.Item.sku == sku)
     if user_id is not None:
         query = query.filter(models.InventoryTransaction.user_id == user_id)
-    return query.order_by(models.InventoryTransaction.created_at.desc()).all()
+    return query.order_by(
+        models.InventoryTransaction.created_at.desc(),
+        models.InventoryTransaction.transaction_id.desc(),
+    ).all()
