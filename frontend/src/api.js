@@ -1,5 +1,13 @@
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000').replace(/\/$/, '')
 
+class ApiError extends Error {
+  constructor(message, status) {
+    super(message)
+    this.name = 'ApiError'
+    this.status = status
+  }
+}
+
 async function apiRequest(path, options = {}) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     headers: {
@@ -16,7 +24,7 @@ async function apiRequest(path, options = {}) {
   }
 
   if (!response.ok) {
-    throw new Error(formatApiError(payload, response.statusText))
+    throw new ApiError(formatApiError(payload, response.statusText), response.status)
   }
 
   return payload
@@ -42,6 +50,17 @@ function getInventoryBySku(sku) {
   return apiRequest(`/inventory/${encodeURIComponent(sku)}`)
 }
 
+function createItem({ sku, itemName, description }) {
+  return apiRequest('/items', {
+    method: 'POST',
+    body: JSON.stringify({
+      sku,
+      item_name: itemName,
+      description: description || null,
+    }),
+  })
+}
+
 function createInventoryAction(action, { sku, userId, quantity, notes }) {
   const endpointByAction = {
     RECEIVE: '/inventory/receive',
@@ -63,4 +82,4 @@ function getTransactions() {
   return apiRequest('/transactions')
 }
 
-export { API_BASE_URL, createInventoryAction, getInventoryBySku, getTransactions, login }
+export { API_BASE_URL, createInventoryAction, createItem, getInventoryBySku, getTransactions, login }
