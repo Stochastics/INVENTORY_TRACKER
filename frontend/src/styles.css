@@ -1,7 +1,10 @@
 :root {
-  color: #172033;
-  background: #eef2f7;
-  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #162033;
+  background: #edf2f7;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
 }
 
 * {
@@ -11,50 +14,475 @@
 body {
   margin: 0;
   min-width: 320px;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgb(37 99 235 / 14%), transparent 30rem),
+    linear-gradient(180deg, #f8fafc 0%, #e8eef6 100%);
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.72;
 }
 
 .app-shell {
-  display: flex;
   min-height: 100vh;
-  align-items: center;
-  justify-content: center;
   padding: 1rem;
 }
 
+.login-shell {
+  display: grid;
+  place-items: center;
+}
+
+.app-container {
+  width: min(100%, 560px);
+  margin: 0 auto;
+  padding: 0.5rem 0 2rem;
+}
+
+.card,
+.banner {
+  border: 1px solid rgb(148 163 184 / 22%);
+  border-radius: 26px;
+  background: rgb(255 255 255 / 94%);
+  box-shadow: 0 20px 48px rgb(15 23 42 / 10%);
+}
+
 .card {
-  width: min(100%, 420px);
-  border-radius: 24px;
-  background: #ffffff;
-  box-shadow: 0 18px 45px rgb(23 32 51 / 12%);
-  padding: 1.5rem;
+  margin-top: 1rem;
+  padding: 1.2rem;
+}
+
+.login-card {
+  width: min(100%, 430px);
+  margin: 0;
+  padding: 1.4rem;
+}
+
+.brand-mark {
+  display: grid;
+  width: 3.25rem;
+  height: 3.25rem;
+  margin-bottom: 1rem;
+  place-items: center;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #1e3a8a, #2563eb);
+  color: #ffffff;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+}
+
+.top-bar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 0.15rem;
 }
 
 .eyebrow {
-  margin: 0 0 0.5rem;
+  margin: 0 0 0.35rem;
   color: #2563eb;
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
+h1,
+h2,
+p {
+  margin-top: 0;
+}
+
+h1,
+h2 {
+  color: #111827;
+  letter-spacing: -0.04em;
+}
+
 h1 {
-  margin: 0 0 1rem;
+  margin-bottom: 0.45rem;
   font-size: clamp(2rem, 10vw, 3rem);
-  line-height: 1;
+  line-height: 0.95;
+}
+
+h2 {
+  margin-bottom: 0.7rem;
+  font-size: clamp(1.35rem, 6vw, 2rem);
+  line-height: 1.05;
 }
 
 p {
-  color: #48556a;
+  color: #536176;
   line-height: 1.5;
 }
 
-.api-note {
-  margin-top: 1.5rem;
-  border-radius: 12px;
-  background: #eef4ff;
-  color: #1d4ed8;
+label {
+  color: #273449;
   font-size: 0.9rem;
+  font-weight: 800;
+}
+
+input,
+textarea {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 16px;
+  background: #f8fafc;
+  color: #111827;
+  outline: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+input {
+  min-height: 3.35rem;
+  padding: 0 1rem;
+}
+
+textarea {
+  min-height: 6rem;
+  padding: 0.9rem 1rem;
+  resize: vertical;
+}
+
+input:focus,
+textarea:focus {
+  border-color: #2563eb;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgb(37 99 235 / 14%);
+}
+
+.stack {
+  display: grid;
+  gap: 0.72rem;
+}
+
+.muted,
+.welcome,
+.field-help,
+.empty-state,
+.description {
+  color: #64748b;
+}
+
+.welcome {
+  margin-bottom: 0;
+  font-weight: 700;
+}
+
+.button {
+  display: inline-flex;
+  min-height: 3rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border: 0;
+  border-radius: 16px;
+  padding: 0.85rem 1rem;
+  font-weight: 850;
+  text-decoration: none;
+  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.button:active {
+  transform: translateY(1px);
+}
+
+.button-primary {
+  background: #1d4ed8;
+  color: #ffffff;
+  box-shadow: 0 12px 24px rgb(29 78 216 / 24%);
+}
+
+.button-primary:hover:not(:disabled) {
+  background: #1e40af;
+}
+
+.button-secondary {
+  background: #e2e8f0;
+  color: #182235;
+}
+
+.button-ghost {
+  min-height: 2.55rem;
+  border: 1px solid #cbd5e1;
+  background: rgb(255 255 255 / 70%);
+  color: #334155;
+  box-shadow: none;
+}
+
+.button-full {
+  width: 100%;
+  margin-top: 0.45rem;
+}
+
+.button-row,
+.search-row {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.section-heading,
+.item-header,
+.transaction-main {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.lookup-card {
+  background: linear-gradient(180deg, #ffffff, #f8fbff);
+}
+
+.item-card {
+  overflow: hidden;
+  background: linear-gradient(160deg, #ffffff 0%, #f8fafc 60%, #eef6ff 100%);
+}
+
+.sku-pill {
+  display: inline-flex;
+  margin-bottom: 0;
+  border-radius: 999px;
+  background: #e0ecff;
+  color: #1d4ed8;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.85rem;
+  font-weight: 850;
+}
+
+.quantity-badge {
+  display: grid;
+  min-width: 5.7rem;
+  min-height: 5.7rem;
+  place-items: center;
+  border-radius: 24px;
+  background: #0f172a;
+  color: #ffffff;
+  text-align: center;
+}
+
+.quantity-badge span {
+  font-size: 2rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.quantity-badge small {
+  color: #cbd5e1;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.action-grid {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.action-button {
+  min-height: 4.4rem;
+  justify-content: space-between;
+  padding: 1rem;
+  text-align: left;
+}
+
+.action-button span {
+  font-size: 1.05rem;
+}
+
+.action-button small {
+  max-width: 13rem;
+  color: rgb(255 255 255 / 82%);
+  font-weight: 650;
+}
+
+.action-button.positive {
+  background: #047857;
+  color: #ffffff;
+}
+
+.action-button.warning {
+  background: #b45309;
+  color: #ffffff;
+}
+
+.action-button.neutral {
+  background: #334155;
+  color: #ffffff;
+}
+
+.banner {
+  margin-top: 1rem;
+  padding: 1rem;
+  font-weight: 750;
+}
+
+.banner.error {
+  border-color: #fecaca;
+  background: #fff1f2;
+  color: #b91c1c;
+}
+
+.success-card {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.confirmation-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.55rem;
+  margin-top: 0.8rem;
+}
+
+.metric {
+  border-radius: 16px;
+  background: #ffffff;
   padding: 0.75rem;
+  text-align: center;
+}
+
+.metric span {
+  display: block;
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.metric strong {
+  display: block;
+  margin-top: 0.1rem;
+  color: #111827;
+  font-size: 1.4rem;
+}
+
+.history-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.transaction-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  background: #fbfdff;
+  padding: 0.9rem;
+}
+
+.transaction-main strong {
+  color: #111827;
+}
+
+.transaction-main p {
+  margin-bottom: 0;
+  font-size: 0.9rem;
+}
+
+.change {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: #f1f5f9;
+  padding: 0.35rem 0.6rem;
+  font-weight: 900;
+}
+
+.positive-text {
+  color: #047857;
+}
+
+.negative-text {
+  color: #b91c1c;
+}
+
+.transaction-meta {
+  display: grid;
+  gap: 0.55rem;
+  grid-template-columns: 1fr;
+  margin: 0.8rem 0 0;
+}
+
+.transaction-meta div {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 0.55rem;
+}
+
+.transaction-meta dt {
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.transaction-meta dd {
+  margin: 0;
+  color: #1f2937;
+  font-weight: 750;
+  text-align: right;
+}
+
+.notes {
+  margin: 0.8rem 0 0;
+  border-radius: 14px;
+  background: #f1f5f9;
+  padding: 0.65rem;
+  color: #475569;
+  font-size: 0.92rem;
+}
+
+.api-note {
+  margin: 1rem 0 0;
+  color: #64748b;
+  font-size: 0.82rem;
+  text-align: center;
   word-break: break-word;
+}
+
+@media (min-width: 520px) {
+  .app-shell {
+    padding: 1.5rem;
+  }
+
+  .card,
+  .banner {
+    padding: 1.35rem;
+  }
+
+  .search-row {
+    grid-template-columns: 1fr auto;
+  }
+
+  .button-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .transaction-meta {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .transaction-meta div {
+    display: block;
+  }
+
+  .transaction-meta dd {
+    margin-top: 0.2rem;
+    text-align: left;
+  }
 }
