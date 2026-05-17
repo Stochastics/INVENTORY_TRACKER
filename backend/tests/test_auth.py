@@ -52,3 +52,23 @@ def test_inactive_user_cannot_log_in(db: Session):
     db.commit()
 
     assert crud.authenticate_user(db, "EMP004", "9753") is None
+
+
+def test_login_cors_middleware_allows_local_react_frontends():
+    from fastapi.middleware.cors import CORSMiddleware
+
+    from app.main import app
+
+    cors_middleware = next(
+        middleware
+        for middleware in app.user_middleware
+        if middleware.cls is CORSMiddleware
+    )
+
+    assert cors_middleware.kwargs["allow_origins"] == [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ]
+    assert cors_middleware.kwargs["allow_credentials"] is True
+    assert cors_middleware.kwargs["allow_methods"] == ["*"]
+    assert cors_middleware.kwargs["allow_headers"] == ["*"]
