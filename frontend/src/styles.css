@@ -486,3 +486,39 @@ textarea:focus {
     text-align: left;
   }
 }
+
+.not-found-card {
+  border-color: #fed7aa;
+  background: linear-gradient(180deg, #fff7ed, #ffffff);
+}
+
+.not-found-card h2 {
+  margin-bottom: 0.45rem;
+  word-break: break-word;
+}
+
+.item-card + .card {
+  margin-top: 0.8rem;
+}
+
+@media (min-width: 520px) {
+  .action-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .action-button {
+    display: grid;
+    align-content: space-between;
+    justify-content: stretch;
+  }
+}
+
+.selected-action {
+  display: inline-flex;
+  margin-bottom: 0.8rem;
+  border-radius: 999px;
+  background: #e0f2fe;
+  color: #075985;
+  padding: 0.4rem 0.7rem;
+  font-weight: 850;
+}

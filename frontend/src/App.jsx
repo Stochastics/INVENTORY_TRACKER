@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import {
   API_BASE_URL,
   createInventoryAction,
+  createItem,
   getInventoryBySku,
   getTransactions,
   login,
@@ -29,6 +30,8 @@ function App() {
   const [sku, setSku] = useState('')
   const [item, setItem] = useState(null)
   const [selectedAction, setSelectedAction] = useState(null)
+  const [isAddingItem, setIsAddingItem] = useState(false)
+  const [notFoundSku, setNotFoundSku] = useState('')
   const [confirmation, setConfirmation] = useState(null)
   const [transactions, setTransactions] = useState([])
   const [isSearching, setIsSearching] = useState(false)
@@ -45,7 +48,7 @@ function App() {
     setIsTransactionsLoading(true)
     try {
       const recentTransactions = await getTransactions()
-      setTransactions(recentTransactions.slice(0, 10))
+      setTransactions(recentTransactions)
     } catch (requestError) {
       setError(`Could not load transaction history: ${requestError.message}`)
     } finally {
@@ -65,6 +68,8 @@ function App() {
     setSku('')
     setItem(null)
     setSelectedAction(null)
+    setIsAddingItem(false)
+    setNotFoundSku('')
     setConfirmation(null)
     setTransactions([])
     setError('')
@@ -82,6 +87,8 @@ function App() {
     setError('')
     setConfirmation(null)
     setSelectedAction(null)
+    setIsAddingItem(false)
+    setNotFoundSku('')
 
     try {
       const inventoryItem = await getInventoryBySku(normalizedSku)
@@ -89,10 +96,39 @@ function App() {
       setSku(inventoryItem.sku)
     } catch (requestError) {
       setItem(null)
-      setError(`SKU lookup failed: ${requestError.message}`)
+      if (requestError.status === 404 || requestError.message.toLowerCase().includes('not found')) {
+        setNotFoundSku(normalizedSku)
+        setError('')
+      } else {
+        setError(`SKU lookup failed: ${requestError.message}`)
+      }
     } finally {
       setIsSearching(false)
     }
+  }
+
+  async function handleItemCreated(createdItem) {
+    setConfirmation(null)
+    setSelectedAction(null)
+    setIsAddingItem(false)
+    setNotFoundSku('')
+    setError('')
+
+    try {
+      const inventoryItem = await getInventoryBySku(createdItem.sku)
+      setItem(inventoryItem)
+      setSku(inventoryItem.sku)
+    } catch (_requestError) {
+      setItem({
+        item_id: createdItem.item_id,
+        sku: createdItem.sku,
+        item_name: createdItem.item_name,
+        description: createdItem.description,
+        quantity_on_hand: 0,
+      })
+      setSku(createdItem.sku)
+    }
+    refreshTransactions()
   }
 
   async function handleActionComplete(transaction) {
@@ -155,7 +191,23 @@ function App() {
           </form>
         </section>
 
-        {item && !selectedAction && <ItemDetail item={item} onSelectAction={setSelectedAction} />}
+        {notFoundSku && !isAddingItem && (
+          <NotFoundCard
+            sku={notFoundSku}
+            onAddItem={() => setIsAddingItem(true)}
+          />
+        )}
+
+        {isAddingItem && (
+          <NewItemForm
+            initialSku={notFoundSku || sku}
+            onCancel={() => setIsAddingItem(false)}
+            onComplete={handleItemCreated}
+            onError={setError}
+          />
+        )}
+
+        {item && <ItemDetail item={item} onSelectAction={setSelectedAction} />}
 
         {item && selectedAction && (
           <InventoryActionForm
@@ -171,6 +223,7 @@ function App() {
         <TransactionHistory
           transactions={transactions}
           isLoading={isTransactionsLoading}
+          selectedSku={item?.sku || ''}
           onRefresh={refreshTransactions}
         />
 
@@ -240,6 +293,94 @@ function LoginScreen({ onLogin }) {
         </form>
       </section>
     </main>
+  )
+}
+
+
+function NotFoundCard({ sku, onAddItem }) {
+  return (
+    <section className="card not-found-card" aria-live="polite">
+      <p className="eyebrow">SKU not found</p>
+      <h2>{sku}</h2>
+      <p className="muted">No inventory item exists for this SKU yet. Add it once, then receive inventory against it.</p>
+      <button className="button button-primary button-full" type="button" onClick={onAddItem}>
+        Add New Item
+      </button>
+    </section>
+  )
+}
+
+function NewItemForm({ initialSku, onCancel, onComplete, onError }) {
+  const [newSku, setNewSku] = useState(initialSku)
+  const [itemName, setItemName] = useState('')
+  const [description, setDescription] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  async function handleSubmit(event) {
+    event.preventDefault()
+    const normalizedSku = newSku.trim()
+    const normalizedName = itemName.trim()
+    if (!normalizedSku || !normalizedName) {
+      onError('SKU and item name are required to add a new item.')
+      return
+    }
+
+    setIsSubmitting(true)
+    onError('')
+    try {
+      const createdItem = await createItem({
+        sku: normalizedSku,
+        itemName: normalizedName,
+        description: description.trim(),
+      })
+      onComplete(createdItem)
+    } catch (requestError) {
+      onError(`Add item failed: ${requestError.message}`)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  return (
+    <section className="card" aria-labelledby="new-item-heading">
+      <p className="eyebrow">Add new item</p>
+      <h2 id="new-item-heading">Create SKU</h2>
+      <p className="muted">Create the item record only. Inventory quantity starts at 0 and can be received after creation.</p>
+      <form className="stack" onSubmit={handleSubmit}>
+        <label htmlFor="new-sku">SKU</label>
+        <input
+          id="new-sku"
+          value={newSku}
+          onChange={(event) => setNewSku(event.target.value)}
+          placeholder="WRNCH-001"
+          autoComplete="off"
+        />
+        <label htmlFor="item-name">Item name</label>
+        <input
+          id="item-name"
+          value={itemName}
+          onChange={(event) => setItemName(event.target.value)}
+          placeholder="Adjustable wrench"
+          autoComplete="off"
+        />
+        <label htmlFor="item-description">Description</label>
+        <textarea
+          id="item-description"
+          value={description}
+          onChange={(event) => setDescription(event.target.value)}
+          placeholder="Optional item description"
+          rows="3"
+        />
+        <div className="button-row">
+          <button className="button button-secondary" type="button" onClick={onCancel}>
+            Cancel
+          </button>
+          <button className="button button-primary" type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Creating…' : 'Create Item'}
+          </button>
+        </div>
+      </form>
+    </section>
   )
 }
 
@@ -323,6 +464,7 @@ function InventoryActionForm({ action, item, user, onCancel, onComplete, onError
     <section className="card" aria-labelledby="action-heading">
       <p className="eyebrow">Inventory action</p>
       <h2 id="action-heading">{actionMeta.label} {item.sku}</h2>
+      <p className="selected-action">Selected action: {actionMeta.label}</p>
       <p className="muted">Current quantity: {item.quantity_on_hand}</p>
       <form className="stack" onSubmit={handleSubmit}>
         <label htmlFor="quantity">Quantity</label>
@@ -369,23 +511,32 @@ function Confirmation({ transaction }) {
   )
 }
 
-function TransactionHistory({ transactions, isLoading, onRefresh }) {
+function TransactionHistory({ transactions, isLoading, selectedSku, onRefresh }) {
+  const visibleTransactions = transactions
+    .filter((transaction) => !selectedSku || transaction.sku === selectedSku)
+    .slice(0, 10)
+  const heading = selectedSku ? 'Recent activity for this item' : 'Global recent activity'
+
   return (
     <section className="card history-card" aria-labelledby="history-heading">
       <div className="section-heading">
         <div>
           <p className="eyebrow">Recent activity</p>
-          <h2 id="history-heading">Transaction history</h2>
+          <h2 id="history-heading">{heading}</h2>
         </div>
         <button className="button button-ghost" type="button" onClick={onRefresh} disabled={isLoading}>
           {isLoading ? 'Loading…' : 'Refresh'}
         </button>
       </div>
-      {transactions.length === 0 && !isLoading ? (
-        <p className="empty-state">No transactions yet. Completed inventory actions will appear here.</p>
+      {visibleTransactions.length === 0 && !isLoading ? (
+        <p className="empty-state">
+          {selectedSku
+            ? 'No transactions for this item yet. Receive, ship out, or adjust inventory to start history.'
+            : 'No transactions yet. Completed inventory actions will appear here.'}
+        </p>
       ) : (
         <div className="history-list">
-          {transactions.map((transaction) => (
+          {visibleTransactions.map((transaction) => (
             <article className="transaction-card" key={transaction.transaction_id}>
               <div className="transaction-main">
                 <div>
