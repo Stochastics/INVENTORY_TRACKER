@@ -1,0 +1,7 @@
+__pycache__/
+*.py[cod]
+.env
+inventory.db
+node_modules/
+dist/
+.vite/
