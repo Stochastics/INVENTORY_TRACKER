@@ -1,6 +1,6 @@
 """SQLAlchemy models for the four-table Inventory MVP schema."""
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, Text, func
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, Text, func, text
 from sqlalchemy.orm import relationship
 
 from app.database import Base
@@ -13,7 +13,7 @@ class User(Base):
     name = Column(Text, nullable=False)
     employee_id = Column(Text, unique=True, nullable=False, index=True)
     pin_hash = Column(Text, nullable=False)
-    is_active = Column(Boolean, default=True)
+    is_active = Column(Boolean, nullable=False, server_default=text("1"))
     created_at = Column(DateTime, server_default=func.current_timestamp())
 
     transactions = relationship("InventoryTransaction", back_populates="user")
@@ -36,8 +36,12 @@ class InventoryBalance(Base):
     __tablename__ = "inventory_balances"
 
     item_id = Column(Integer, ForeignKey("items.item_id"), primary_key=True)
-    quantity_on_hand = Column(Integer, nullable=False, default=0)
-    updated_at = Column(DateTime, server_default=func.current_timestamp(), onupdate=func.current_timestamp())
+    quantity_on_hand = Column(Integer, nullable=False, server_default=text("0"))
+    updated_at = Column(
+        DateTime,
+        server_default=func.current_timestamp(),
+        onupdate=func.current_timestamp(),
+    )
 
     item = relationship("Item", back_populates="balance")
 
