@@ -60,6 +60,15 @@ class InventoryBalanceRead(BaseModel):
         from_attributes = True
 
 
+class InventoryRead(BaseModel):
+    item_id: int
+    sku: str
+    item_name: str
+    description: Optional[str] = None
+    quantity_on_hand: int
+    updated_at: datetime
+
+
 class InventoryAction(BaseModel):
     sku: str
     user_id: int
@@ -87,3 +96,9 @@ class TransactionRead(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class TransactionDetailRead(TransactionRead):
+    sku: str
+    item_name: str
+    user_name: str
